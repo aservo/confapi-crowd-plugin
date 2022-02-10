@@ -17,78 +17,88 @@ public class ApplicationsResourceFuncTest {
 
     @Test
     public void testGetAllApplications() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
-        ClientResponse clientResponse = settingsResource.get();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ApplicationsBean response = clientResponse.getEntity(ApplicationsBean.class);
+        assertEquals(4, response.getApplications().size());
     }
 
     @Test
     public void testGetIdApplication() {
-        Long applicationId = createApplicationGetId(createApplicationBean("testGetExample"));
+        Long applicationId = createApplicationGetId(createApplicationBeanWithName("ExampleBean"));
 
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
-        ClientResponse clientResponse = settingsResource.get();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        assertEquals(applicationId, clientResponse.getEntity(ApplicationBean.class).getId());
     }
 
     @Test
     public void testDeleteAllApplications() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/?force=true").build();
-        createApplicationGetId(createApplicationBean("testDeleteAllExample1"));
-        createApplicationGetId(createApplicationBean("testDeleteAllExample2"));
-
-        ClientResponse clientResponse = settingsResource.delete();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/?force=true").build();
+        ClientResponse clientResponse = resource.delete();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ClientResponse clientGetResponse = resource.get();
+        assertEquals(Response.Status.OK.getStatusCode(), clientGetResponse.getStatusCode());
+        ApplicationsBean response = clientGetResponse.getEntity(ApplicationsBean.class);
+        assertEquals(2, response.getApplications().size());
     }
 
     @Test
     public void testDeleteIdApplication() {
-        Long applicationId = createApplicationGetId(createApplicationBean("testDeleteExample"));
+        Long applicationId = createApplicationGetId(createApplicationBeanWithName("ExampleBean2"));
 
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
-        ClientResponse clientResponse = settingsResource.delete();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
+        ClientResponse clientResponse = resource.delete();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ClientResponse clientGetResponse = resource.get();
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), clientGetResponse.getStatusCode());
     }
 
     @Test
     public void testDeleteIdApplicationWithError() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/1").build();
-        ClientResponse clientResponse = settingsResource.delete();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/1").build();
+        ClientResponse clientResponse = resource.delete();
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), clientResponse.getStatusCode());
     }
 
     @Test
-    public void testPutAllApplications() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
-        createApplicationBean("app_name");
-        ClientResponse clientResponse = settingsResource.put(new ApplicationsBean((Collections.singletonList(ApplicationBean.EXAMPLE_1))));
+    public void testPutAllApplications() {// TODO
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
+        createApplicationBeanWithName("Example1");
+        createApplicationBeanWithName("Example2");
+        ClientResponse clientResponse = resource.put(new ApplicationsBean((Collections.singletonList(ApplicationBean.EXAMPLE_1))));
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
     }
 
     @Test
-    public void testPutIdApplication() {
-        Long applicationId = createApplicationGetId(createApplicationBean("testPutExample"));
+    public void testPutIdApplication() { // TODO
+        Long applicationId = createApplicationGetId(createApplicationBeanWithName("testPutExample"));
 
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
-        ClientResponse clientResponse = settingsResource.put(ApplicationBean.EXAMPLE_2);
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
+        ClientResponse clientResponse = resource.put(ApplicationBean.EXAMPLE_2);
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
     }
 
     @Test
     public void testAddNewApplication() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
-        ClientResponse clientResponse = settingsResource.post(ApplicationBean.EXAMPLE_1);
+        Long applicationId = createApplicationGetId(ApplicationBean.EXAMPLE_1);
+
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS + "/" + applicationId).build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        assertEquals( applicationId, clientResponse.getEntity(ApplicationBean.class).getId());
     }
 
     private Long createApplicationGetId(ApplicationBean bean) {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
-        ClientResponse clientResponse = settingsResource.post(bean);
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATIONS).build();
+        ClientResponse clientResponse = resource.post(bean);
 
         return clientResponse.getEntity(ApplicationBean.class).getId();
     }
 
-    private  ApplicationBean createApplicationBean (String name) {
+    private  ApplicationBean createApplicationBeanWithName (String name) {
         ApplicationBean applicationBean = new ApplicationBean();
         applicationBean.setName(name);
         applicationBean.setDescription(name);

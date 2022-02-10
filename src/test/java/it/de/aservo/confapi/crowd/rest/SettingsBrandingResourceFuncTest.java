@@ -18,29 +18,32 @@ public class SettingsBrandingResourceFuncTest {
 
     @Test
     public void testGetLoginPage() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.SETTINGS + "/" + ConfAPI.SETTINGS_BRANDING + "/" + ConfAPI.SETTINGS_BRANDING_LOGIN_PAGE).build();
-        ClientResponse clientResponse = settingsResource.get();
+        Resource resource = ResourceBuilder.builder(ConfAPI.SETTINGS + "/" + ConfAPI.SETTINGS_BRANDING + "/" + ConfAPI.SETTINGS_BRANDING_LOGIN_PAGE).build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        assertEquals(SettingsBrandingLoginPageBean.EXAMPLE_2, clientResponse.getEntity(SettingsBrandingLoginPageBean.class));
     }
 
     @Test
     public void testGetSettings()  {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.SETTINGS).build();
-        ClientResponse clientResponse = settingsResource.get();
+        Resource resource = ResourceBuilder.builder(ConfAPI.SETTINGS).build();
+        ClientResponse clientResponse = resource.get();
+        assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        assertEquals(SettingsBean.EXAMPLE_1.getBaseUrl(), clientResponse.getEntity(SettingsBean.class).getBaseUrl());
+        assertEquals(SettingsBean.EXAMPLE_1.getTitle(), clientResponse.getEntity(SettingsBean.class).getTitle());
+    }
+
+    @Test
+    public void testPutLoginPage () { // TODO
+        Resource resource = ResourceBuilder.builder(ConfAPI.SETTINGS + "/" + ConfAPI.SETTINGS_BRANDING + "/" + ConfAPI.SETTINGS_BRANDING_LOGIN_PAGE).build();
+        ClientResponse clientResponse = resource.put(SettingsBrandingLoginPageBean.EXAMPLE_2);
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
     }
 
     @Test
-    public void testPutLoginPage () {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.SETTINGS + "/" + ConfAPI.SETTINGS_BRANDING + "/" + ConfAPI.SETTINGS_BRANDING_LOGIN_PAGE).build();
-        ClientResponse clientResponse = settingsResource.put(SettingsBrandingLoginPageBean.EXAMPLE_2);
-        assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
-    }
-
-    @Test
-    public void testPutSettings () {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.SETTINGS).build();
-        ClientResponse clientResponse = settingsResource.put(SettingsBean.EXAMPLE_1);
+    public void testPutSettings () { // TODO
+        Resource resource = ResourceBuilder.builder(ConfAPI.SETTINGS).build();
+        ClientResponse clientResponse = resource.put(SettingsBean.EXAMPLE_1);
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
     }
 }

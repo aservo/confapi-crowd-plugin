@@ -17,62 +17,81 @@ public class ApplicationLinksResourceFuncTest {
 
     @Test
     public void testGetAllApplicationLinks() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS).build();
-        ClientResponse clientResponse = settingsResource.get();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS).build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ApplicationLinksBean applicationLinksBean = clientResponse.getEntity(ApplicationLinksBean.class);
+        assertEquals(1, applicationLinksBean.getApplicationLinks().size());
     }
 
     @Test
     public void testGetIdApplicationLink() {
         UUID applicationLinkUuid = createApplicationLinkGetId(ApplicationLinkBean.EXAMPLE_1);
 
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
-        ClientResponse clientResponse = settingsResource.get();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        assertEquals(applicationLinkUuid, clientResponse.getEntity(ApplicationLinkBean.class).getUuid());
     }
 
     @Test
     public void testDeleteAllApplicationLinks() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?force=true").build();
-        ClientResponse clientResponse = settingsResource.delete();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?force=true").build();
+        ClientResponse clientResponse = resource.delete();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ClientResponse clientGetResponse = resource.get();
+        assertEquals(Response.Status.OK.getStatusCode(), clientGetResponse.getStatusCode());
+        ApplicationLinksBean applicationLinksBean = clientGetResponse.getEntity(ApplicationLinksBean.class);
+        assertEquals(0, applicationLinksBean.getApplicationLinks().size());
     }
 
     @Test
     public void testDeleteIdApplicationLink() {
         UUID applicationLinkUuid = createApplicationLinkGetId(ApplicationLinkBean.EXAMPLE_1);
 
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
-        ClientResponse clientResponse = settingsResource.delete();
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
+        ClientResponse clientResponse = resource.delete();
+        assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ClientResponse clientGetResponse = resource.get();
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), clientGetResponse.getStatusCode());
+    }
+
+    @Test
+    public void testPutAllApplicationLinks() {// TODO
+        UUID applicationLinkUuidExampleOne = createApplicationLinkGetId(ApplicationLinkBean.EXAMPLE_1);
+        UUID applicationLinkUuidExampleTwo = createApplicationLinkGetId(ApplicationLinkBean.EXAMPLE_1);
+
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?ignore-setup-errors=true").build();
+        ClientResponse clientResponse = resource.put(ApplicationLinksBean.EXAMPLE_1);
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
     }
 
     @Test
-    public void testPutAllApplicationLinks() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?ignore-setup-errors=true").build();
-        ClientResponse clientResponse = settingsResource.put(ApplicationLinksBean.EXAMPLE_1);
-        assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
-    }
-
-    @Test
-    public void testPutIdApplicationLink() {
+    public void testPutIdApplicationLink() {// TODO
         UUID applicationLinkUuid = createApplicationLinkGetId(ApplicationLinkBean.EXAMPLE_1);
 
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
-        ClientResponse clientResponse = settingsResource.put(ApplicationLinkBean.EXAMPLE_1);
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
+        ApplicationLinkBean exampleBean = ApplicationLinkBean.EXAMPLE_1;
+        exampleBean.setUsername("new-user");
+        ClientResponse clientResponse = resource.put(exampleBean);
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        ClientResponse clientGetResponse = resource.get();
+        assertEquals(clientGetResponse.getEntity(ApplicationLinkBean.class).getName(),exampleBean.getUsername());
     }
 
     @Test
     public void testAddNewApplicationLink() {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?ignore-setup-errors=true").build();
-        ClientResponse clientResponse = settingsResource.post(ApplicationLinkBean.EXAMPLE_1);
+        UUID applicationLinkUuid = createApplicationLinkGetId(ApplicationLinkBean.EXAMPLE_1);
+
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "/" + applicationLinkUuid + "?ignore-setup-errors=true").build();
+        ClientResponse clientResponse = resource.get();
         assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatusCode());
+        assertEquals(applicationLinkUuid, clientResponse.getEntity(ApplicationLinkBean.class).getUuid());
     }
 
     private UUID createApplicationLinkGetId(ApplicationLinkBean bean) {
-        Resource settingsResource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?ignore-setup-errors=true").build();
-        ClientResponse clientResponse = settingsResource.post(bean);
+        Resource resource = ResourceBuilder.builder(ConfAPI.APPLICATION_LINKS + "?ignore-setup-errors=true").build();
+        ClientResponse clientResponse = resource.post(bean);
 
         return clientResponse.getEntity(ApplicationLinkBean.class).getUuid();
     }
